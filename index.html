@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <style>
+        table {
+            width: 100%;
+            height: 100%;
+        }
+        .textAreaWrapper {
+            width: 100%;
+            height: 80vh;
+        }
+        textarea {
+            width: 80%;
+            height: 95%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+<table>
+    <tr>
+        <td>
+            <div>
+                <label>Origin code</label>
+            </div>
+        </td>
+        <td>
+            <div>
+                <label>Origin Parsed code</label>
+            </div>
+        </td>
+        <td>
+            <div>
+                <label>After Substitution code</label>
+            </div>
+        </td>
+        <td>
+            <div>
+                <label>After Substitution Parsed code</label>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="textAreaWrapper">
+                <textarea id="originCodeInput" title="Enter code here">function foo(x, y, z){
+
+    let a = x + 1;
+    let b = a + y;
+    let c = 0;
+    if (a < z) {
+        c = a + b;
+        z = c * 2;
+    }
+    return z;
+}</textarea>
+            </div>
+        </td>
+        <td>
+            <div class="textAreaWrapper">
+                <textarea id="originParsedCodeResult">
+                </textarea>
+            </div>
+        </td>
+        <td>
+            <div id="substituteCodeResult">
+            </div>
+        </td>
+        <td>
+            <div class="textAreaWrapper">
+                <textarea id="substituteParsedCodeResult">
+                </textarea>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div>
+                <textarea id="funcArgsInput" title="Enter arguments here">1,2,3</textarea>
+            </div>
+        </td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>
+            <div>
+                <button id="codeSubmissionButton">Substitution code</button>
+            </div>
+        </td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+
+<script src="dist/bundle.js"></script>
+</body>
+</html>
