@@ -8,7 +8,8 @@ $(document).ready(function () {
         let originCodeInput = $('#originCodeInput').val().replace(/[\r\n]+/g, '\n');
         originCodeInput = originCodeInput.replace('\n{','{');
         originCodeInput = originCodeInput.replace('}\n','}');
-        let funcArgsInput = $('#funcArgsInput').val().split(',');
+        let funcArgsInput = $('#funcArgsInput').val();
+
         let originParsedCodeResult = parseCode(originCodeInput);
         $('#originParsedCodeResult').val(JSON.stringify(originParsedCodeResult, null, 2));
 

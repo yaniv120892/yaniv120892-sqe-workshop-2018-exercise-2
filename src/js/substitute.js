@@ -27,20 +27,36 @@ let insideFunc = false;
 
 function addArgsToEnv(env, args) {
     let envWithArgs = {};
-    for(var key in env.keys){
-        envWithArgs[key] = env[key];
+    let parsedArgs = parseCode(args).body[0].expression.expressions;
+    for(let i = 0; i < listParams.length; i++) {
+        if (parsedArgs[i].type === 'ArrayExpression') {
+            for (let itemIndex = 0; itemIndex < parsedArgs[i].elements.length; itemIndex++) {
+                envWithArgs[listParams[i] + '[' + itemIndex + ']'] = parsedArgs[i].elements[itemIndex];
+            }
+        } else {
+            envWithArgs[listParams[i]] = parsedArgs[i];
+        }
     }
-    for(let i = 0; i < listParams.length; i++){
-        let parsed = parseCode(args[i] + '');
-        envWithArgs[listParams[i]] = parsed.body[0].expression;
+    for(var key in env) {
+        if (key in envWithArgs) {
+            envWithArgs[key] = env[key];
+        }
     }
+    console.log('env');
+    console.log(env);
+    console.log('env with args');
+    console.log(envWithArgs);
     return envWithArgs;
 }
 
 function updateLineColors(ifStatementObj, env, args) {
+    console.log('start updateLineColors');
+    console.log('env before:');
+    console.log(env);
     let envWithArgs = addArgsToEnv(env, args);
     let cloneJsonObj = esprima.parseScript(escodegem.generate(ifStatementObj.test), {loc: true});
-    let evaluatedTest = sub(cloneJsonObj, envWithArgs, args).body[0].expression;
+    let evaluatedTest = sub(cloneJsonObj.body[0].expression, envWithArgs, args);
+    console.log(evaluatedTest);
     if (evaluatedTest.type === 'Literal') {
         if (evaluatedTest.value) greenLines.push(ifStatementObj.test.loc.start.line-1);
         else redLines.push(ifStatementObj.test.loc.start.line-1);
@@ -61,7 +77,9 @@ function sub_binary_exp(jsonObj, env, args) {
     jsonObj.right = sub(jsonObj.right, env, args);
     jsonObj.left = sub(jsonObj.left, env, args);
     if (jsonObj.left.type === 'Literal' && jsonObj.right.type === 'Literal'){
+        console.log(jsonObj);
         let value = eval(jsonObj.left.raw+jsonObj.operator+jsonObj.right.raw);
+        console.log('value ='+value);
         return {'type': 'Literal', 'value': value, 'raw': ''+value};
     }
     return jsonObj;
@@ -71,8 +89,20 @@ function sub_unary_exp(jsonObj, env, args) {
     return jsonObj;
 }
 function sub_member_exp(jsonObj, env, args) {
-    jsonObj.object = sub(jsonObj.object, env, args);
+    //jsonObj.object = sub(jsonObj.object, env, args);
     jsonObj.property = sub(jsonObj.property, env, args);
+    var key = '';
+    if(jsonObj.property.type === 'Literal'){
+        key = jsonObj.object.name+'['+jsonObj.property.raw+']';
+    }
+    console.log('env');
+    console.log(env);
+    console.log('key');
+    console.log(key);
+    if(key in env)
+    {
+        return env[key];
+    }
     return jsonObj;
 }
 function sub_update_exp(jsonObj, env, args) {
@@ -80,10 +110,26 @@ function sub_update_exp(jsonObj, env, args) {
     return jsonObj;
 }
 function sub_assign_exp(jsonObj, env, args) {
-    let left = jsonObj.left.name;
-    if (insideFunc && !(listParams.includes(left))) listRowsToIgnore.push(jsonObj.loc.start.line - 1);
+    let leftName = '';
+    if (jsonObj.left.type === 'MemberExpression'){
+        leftName = jsonObj.left.object.name;
+    }
+    else{
+        leftName = jsonObj.left.name;
+    }
+    if (insideFunc && !(listParams.includes(leftName))) listRowsToIgnore.push(jsonObj.loc.start.line - 1);
     jsonObj.right = sub(jsonObj.right, env, args);
-    env[left] = jsonObj.right;
+    let envKey = leftName;
+    if (jsonObj.left.type === 'MemberExpression'){
+        let itemIndex = '';
+        let itemIndexJsonObj = sub(jsonObj.left.property, env, args);
+        if(itemIndexJsonObj.type === 'Literal'){
+            itemIndex = itemIndexJsonObj.raw;
+        }
+        envKey = jsonObj.left.object.name+'['+itemIndex+']';
+    }
+    env[envKey] = jsonObj.right;
+
     return jsonObj;
 }
 function sub_exp_stmt(jsonObj, env, args) {
@@ -136,7 +182,6 @@ function sub_variable_declaration(jsonObj, env, args) {
     for (let i = 0; i < jsonObj.declarations.length; i++) {
         if(insideFunc) listRowsToIgnore.push(jsonObj.declarations[i].loc.start.line - 1);
         jsonObj.declarations[i] = sub(jsonObj.declarations[i], env, args);
-
     }
     return jsonObj;
 }
