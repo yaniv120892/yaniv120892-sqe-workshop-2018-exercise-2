@@ -54,6 +54,7 @@ function updateLineColors(ifStatementObj, env, args) {
     console.log('env before:');
     console.log(env);
     let envWithArgs = addArgsToEnv(env, args);
+    console.log(escodegem.generate(ifStatementObj.test));
     let cloneJsonObj = esprima.parseScript(escodegem.generate(ifStatementObj.test), {loc: true});
     let evaluatedTest = sub(cloneJsonObj.body[0].expression, envWithArgs, args);
     console.log(evaluatedTest);
@@ -149,11 +150,11 @@ function sub_block_stmt(jsonObj, env, args) {
 
 function sub_if_stmt(jsonObj, env, args) {
     jsonObj.test = sub(jsonObj.test, env, args);
-    jsonObj.consequent = sub(jsonObj.consequent, env, args);
+    updateLineColors(jsonObj, env, args);
     if(jsonObj.alternate != null) {
         jsonObj.alternate = sub(jsonObj.alternate, env, args);
     }
-    updateLineColors(jsonObj, env, args);
+    jsonObj.consequent = sub(jsonObj.consequent, env, args);
     return jsonObj;
 }
 function sub_while_stmt(jsonObj, env, args) {
