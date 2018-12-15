@@ -6,20 +6,17 @@ import {codeView} from './code-view';
 $(document).ready(function () {
     $('#codeSubmissionButton').click(() => {
         let originCodeInput = $('#originCodeInput').val().replace(/[\r\n]+/g, '\n');
-        originCodeInput = originCodeInput.replace('\n{','{');
-        originCodeInput = originCodeInput.replace('}\n','}');
+        originCodeInput = originCodeInput.replace(/[\r\n]+/g, '\r\n');
+        originCodeInput = originCodeInput.replace('\r\n{','{');
+        originCodeInput = originCodeInput.replace('}\r\n','}');
+        let ansNoEvalAndArgs = substitutedCode(parseCode(originCodeInput), {}, '', false);
+
         let funcArgsInput = $('#funcArgsInput').val();
-
-        let originParsedCodeResult = parseCode(originCodeInput);
-        $('#originParsedCodeResult').val(JSON.stringify(originParsedCodeResult, null, 2));
-
-
-        let res = substitutedCode(originParsedCodeResult, funcArgsInput);
-        $('#substituteParsedCodeResult').val(JSON.stringify(res['newJson'], null, 2));
-
-
-        let codeViewResult = codeView(res['newJson'], res['greenLines'], res['redLines'], res['listRowsToIgnore']);
+        let ansWithEvalAndArgs = substitutedCode(parseCode(originCodeInput),{} ,funcArgsInput, true);
+        $('#substituteParsedCodeResult').val(JSON.stringify(ansNoEvalAndArgs['newJson'], null, 2));
+        let codeViewResult = codeView(ansNoEvalAndArgs['newJson'], ansWithEvalAndArgs['greenLines'], ansWithEvalAndArgs['redLines'], ansNoEvalAndArgs['listRowsToIgnore']);
         $('#substituteCodeResult').empty();
-        $('#substituteCodeResult').append(codeViewResult);
+        for(let i= 0; i < codeViewResult.length; i++)
+            $('#substituteCodeResult').append('<span style="color:' + codeViewResult[i].color + ';">' + codeViewResult[i].line + '</span><br>');
     });
 });
