@@ -5,7 +5,8 @@ import {codeView} from './code-view';
 
 $(document).ready(function () {
     $('#codeSubmissionButton').click(() => {
-        let originCodeInput = $('#originCodeInput').val().replace(/[\r\n]+/g, '\n');
+        let originCodeInput = $('#originCodeInput').val().replace('    \n', '');
+        originCodeInput = originCodeInput.replace(/[\r\n]+/g, '\r\n');
         originCodeInput = originCodeInput.replace(/[\r\n]+/g, '\r\n');
         originCodeInput = originCodeInput.replace('\r\n{','{');
         originCodeInput = originCodeInput.replace('}\r\n','}');
